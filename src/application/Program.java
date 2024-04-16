@@ -67,6 +67,22 @@ public class Program {
 
 		} catch (ParseException e) {
 			e.printStackTrace();
+		}
+
+// ------------ AULA 272 ------------
+
+		try {
+			pst = conn.prepareStatement(
+					"UPDATE seller " + "SET BaseSalary = BaseSalary + ? " + "WHERE " + "(DepartmentId = ?)");
+
+			pst.setDouble(1, 200.0);
+			pst.setInt(2, 2);
+
+			int rowsAffected = pst.executeUpdate();
+
+			System.out.println("Done! Rows affected = " + rowsAffected);
+		} catch (SQLException e) {
+			e.printStackTrace();
 		} finally {
 			DB.closeResultSet(rs);
 			DB.closeStatement(st);
@@ -74,5 +90,4 @@ public class Program {
 			DB.closeConection();
 		}
 	}
-
 }
