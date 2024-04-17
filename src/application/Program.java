@@ -9,6 +9,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
 import db.DB;
+import db.DbIntegrityException;
 
 public class Program {
 
@@ -83,11 +84,20 @@ public class Program {
 			System.out.println("Done! Rows affected = " + rowsAffected);
 		} catch (SQLException e) {
 			e.printStackTrace();
-		} finally {
-			DB.closeResultSet(rs);
-			DB.closeStatement(st);
-			DB.closeStatement(pst);
-			DB.closeConection();
 		}
+// ------------ AULA 273 ------------
+
+		try {
+			pst = conn.prepareStatement("DELETE FROM department " + "WHERE " + "Id = ?");
+
+			pst.setInt(1, 2); // O interrogacao numero 1 vai ser preenchido com 5, e o Id 5 vai ser deletado
+
+			int rowsAffected = pst.executeUpdate();
+
+			System.out.println("Done! Affected rows = " + rowsAffected);
+		} catch (SQLException e) {
+			throw new DbIntegrityException(e.getMessage());
+		}
+
 	}
 }
