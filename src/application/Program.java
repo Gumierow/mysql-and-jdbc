@@ -9,6 +9,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
 import db.DB;
+import db.DbException;
 import db.DbIntegrityException;
 
 public class Program {
@@ -87,17 +88,50 @@ public class Program {
 		}
 // ------------ AULA 273 ------------
 
+		/*
+		 * 
+		 * try { pst = conn.prepareStatement("DELETE FROM department " + "WHERE " +
+		 * "Id = ?");
+		 * 
+		 * pst.setInt(1, 2); // O interrogacao numero 1 vai ser preenchido com 5, e o Id
+		 * 5 vai ser deletado
+		 * 
+		 * int rowsAffected = pst.executeUpdate();
+		 * 
+		 * System.out.println("Done! Affected rows = " + rowsAffected); } catch
+		 * (SQLException e) { throw new DbIntegrityException(e.getMessage()); }
+		 * 
+		 */
+
+// ------------ AULA 273 ------------
+
 		try {
-			pst = conn.prepareStatement("DELETE FROM department " + "WHERE " + "Id = ?");
+			conn.setAutoCommit(false); // #2 - Como deu o erro falso e so commitou a alteracao pro rows1 estamos
+										// colocando esse metodo aqui
 
-			pst.setInt(1, 2); // O interrogacao numero 1 vai ser preenchido com 5, e o Id 5 vai ser deletado
+			int rows1 = st.executeUpdate("UPDATE seller SET BaseSalary = 2090 WHERE DepartmentId = 1");
 
-			int rowsAffected = pst.executeUpdate();
+			int x = 1;
+			if (x < 2) {
+				throw new SQLException("Fake error!"); // #1 - Aqui criamos um "erro" no meio da transacao para testar
+			}
 
-			System.out.println("Done! Affected rows = " + rowsAffected);
+			int rows2 = st.executeUpdate("UPDATE seller SET BaseSalary = 3090 WHERE DepartmentId = 2");
+
+			conn.commit(); // #3 - Agora colocamos isso para permitir o commit
+
+			System.out.println("rows1 = " + rows1 + ", rows2 =" + rows2);
+
 		} catch (SQLException e) {
-			throw new DbIntegrityException(e.getMessage());
+			try {
+				conn.rollback(); // #4 - Caso tenha o erro vamos desfazer o que ja tinha ocorrido na transacao
+									// com o rollback
+				throw new DbException("Transaction rolled back! Caused by: " + e.getMessage());
+			} catch (SQLException e1) {
+				throw new DbException("Error trying to rollback! Caused by: " + e1.getMessage()); // #5 - Aqui eh pra
+																									// quando der erro
+																									// no rollback
+			}
 		}
-
 	}
 }
